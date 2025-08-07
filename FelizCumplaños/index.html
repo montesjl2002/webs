@@ -1,27 +1,45 @@
-<!-- html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCode</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="./style.css" />
-    
+    <title>Propuesta</title>
+    <link rel="stylesheet" href="./style.css">
 </head>
+<body>
+    <div class="hearts" id="hearts"></div>
 
-<body class="bg-black">
-    <audio id="backgroundAudio" autoplay loop>
-        <source src="./audio/audio.mp3" type="audio/mpeg">
-        Tu navegador no soporta audio HTML5
-    </audio>
+    <div class="container">
+        <h1>¿Quieres ser mi novia?</h1>
 
-    <div class="efecto-bloom"></div>
-    <div class="terminal" id="terminal"></div>
-    <div class="love-container" id="loveContainer"></div>
-    
-    <img src="./img/img.gif" alt="Imagen especial" class="hidden-image">
-    <div class="centro">FELÍZ CUMPLEAÑOS MI  PRINCESA <span><br>12/07/25</span></div>
+        <div class="letter">
+            <p>Desde que te conocí, no he dejado de pensar en lo especial que eres. Tu forma de ser, tu sonrisa, tu energía... todo en ti me encanta.</p>
+            <p>Estar contigo me hace sentir feliz y completo. Cada momento a tu lado es único y me encantaría crear muchos más recuerdos contigo.</p>
+            <p>No sé qué nos depara el futuro, pero sí sé que me gustaría compartirlo contigo, conocernos aún más y construir algo bonito juntos ❤︎</p>
+            <p>Por eso hoy, con mucho cariño y emoción, quiero preguntarte:</p>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-yes" id="btnYes">¡Sí!</button>
+        </div>
+
+        <div class="no-message" id="noMessage">Por favor, piénsalo otra vez... me encantaría intentarlo contigo ❤️</div>
+    </div>
+
+    <!-- Botón "No" que se moverá por toda la pantalla -->
+    <button class="btn btn-no" id="btnNo">No</button>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2>¡Gracias por decir que sí!</h2>
+            <p>Me haces inmensamente feliz al aceptar ser mi novia. Prometo hacer todo lo posible para hacerte sonreír y disfrutar cada momento juntos.</p>
+            <p>Esto es solo el comienzo de algo muy bonito y especial, y estoy muy emocionado por todo lo que viene.</p>
+            <p>¡Te quiero mucho!</p>
+            <button class="modal-btn" id="modalBtn">¡Yo también te quiero!</button>
+        </div>
+    </div>
+
+    <script src="./script.js"></script>
 </body>
-<script src="./script.js"></script>
 </html>

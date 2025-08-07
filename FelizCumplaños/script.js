@@ -1,64 +1,76 @@
-// script.js
+document.addEventListener('DOMContentLoaded', function () {
+    const btnYes = document.getElementById('btnYes');
+    const btnNo = document.getElementById('btnNo');
+    const noMessage = document.getElementById('noMessage');
+    const modal = document.getElementById('modal');
+    const closeModal = document.getElementById('closeModal');
+    const modalBtn = document.getElementById('modalBtn');
+    const heartsContainer = document.getElementById('hearts');
 
-// Configuración Matrix
-const LINE_COUNT = 30;
-const MATRIX_TEXT = "TE AMO ";
-const LOVE_CHARS = ["❤", "💖", "💕", "💞", "💝"];
+    // Mueve el botón "No" aleatoriamente en la pantalla
+    function moveButtonRandomly() {
+        const maxX = window.innerWidth - btnNo.offsetWidth;
+        const maxY = window.innerHeight - btnNo.offsetHeight;
 
-// Elementos interactivos
-const centro = document.querySelector('.centro');
-const hiddenImage = document.querySelector('.hidden-image');
-const audioElement = document.getElementById('backgroundAudio');
+        const randomX = Math.random() * maxX;
+        const randomY = Math.random() * maxY;
 
-// Controlador de clic para el centro
-centro.addEventListener('click', () => {
-    hiddenImage.classList.toggle('active');
-});
-
-// Inicializar Matrix
-function initMatrix() {
-    const container = document.getElementById('terminal');
-    for (let i = 0; i < LINE_COUNT; i++) {
-        const line = document.createElement('div');
-        line.className = 'text-container';
-        line.style.animation = `scroll ${5 + i / 2}s linear infinite`;
-        line.style.animationDelay = `${i * 0.3}s`;
-        line.textContent = MATRIX_TEXT.repeat(window.innerWidth / 50);
-        container.appendChild(line);
+        btnNo.style.left = `${randomX}px`;
+        btnNo.style.top = `${randomY}px`;
     }
-}
 
-// Inicializar Love Effect
-function initLoveEffect() {
-    const container = document.getElementById('loveContainer');
-    setInterval(() => {
-        const love = document.createElement('div');
-        love.className = 'love-text';
-        love.style.left = `${Math.random() * 95}vw`;
-        love.style.animationDuration = `${Math.random() * 4 + 6}s`;
-        love.textContent = LOVE_CHARS[Math.floor(Math.random() * LOVE_CHARS.length)];
-        container.appendChild(love);
-        setTimeout(() => love.remove(), 10000);
-    }, 100);
-}
+    // Mover cada segundo automáticamente
+    setInterval(moveButtonRandomly, 1000);
 
-function handleResize() {
-    document.querySelectorAll('.text-container').forEach(line => {
-        line.textContent = MATRIX_TEXT.repeat(window.innerWidth / 50);
+    // Mover cuando se pasa el mouse por encima
+    btnNo.addEventListener('mouseover', () => {
+        moveButtonRandomly();
+        noMessage.style.display = 'block';
     });
-    const centro = document.querySelector('.centro');
-    centro.style.fontSize = `${Math.min(window.innerWidth, window.innerHeight) * 0.1}px`;
-}
 
-// Inicialización
-window.addEventListener('load', () => {
-    initMatrix();
-    initLoveEffect();
-    handleResize();
-    // Intentar iniciar audio después de la interacción del usuario
-    document.body.addEventListener('click', () => {
-        audioElement.play().catch(() => { });
-    }, { once: true });
+    // Mensaje si se intenta hacer clic en "No"
+    btnNo.addEventListener('click', function () {
+        noMessage.style.display = 'block';
+        noMessage.style.animation = 'shake 0.5s';
+
+        setTimeout(() => {
+            noMessage.style.animation = 'none';
+            void noMessage.offsetWidth;
+            noMessage.style.animation = 'shake 0.5s';
+        }, 10);
+    });
+
+    // Aceptar: mostrar modal y corazones
+    btnYes.addEventListener('click', function () {
+        modal.style.display = 'flex';
+        createHearts();
+    });
+
+    closeModal.addEventListener('click', function () {
+        modal.style.display = 'none';
+    });
+
+    modalBtn.addEventListener('click', function () {
+        modal.style.display = 'none';
+        createHearts();
+    });
+
+    function createHearts() {
+        heartsContainer.innerHTML = '';
+
+        for (let i = 0; i < 50; i++) {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.top = Math.random() * 100 + '%';
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            heart.style.animationDelay = Math.random() * 2 + 's';
+
+            heartsContainer.appendChild(heart);
+        }
+    }
+
+    createHearts();
 });
-
-window.addEventListener('resize', handleResize);
