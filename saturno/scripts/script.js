@@ -78,6 +78,14 @@
             const rotateEnd = new THREE.Vector2();
             const rotateDelta = new THREE.Vector2();
 
+            const panStart = new THREE.Vector2();
+            const panEnd = new THREE.Vector2();
+            const panDelta = new THREE.Vector2();
+
+            const dollyStart = new THREE.Vector2();
+            const dollyEnd = new THREE.Vector2();
+            const dollyDelta = new THREE.Vector2();
+
             this.update = function () {
                 const offset = new THREE.Vector3();
                 const quat = new THREE.Quaternion().setFromUnitVectors(object.up, new THREE.Vector3(0, 1, 0));
@@ -169,35 +177,133 @@
                 sphericalDelta.theta -= angle;
             }
 
-            // Basic event handling
+            function rotateUp(angle) {
+                sphericalDelta.phi -= angle;
+            }
+
+            function dollyOut(dollyScale) {
+                if (scope.object.isPerspectiveCamera) {
+                    scale /= dollyScale;
+                } else if (scope.object.isOrthographicCamera) {
+                    scope.object.zoom = Math.max(scope.minZoom, Math.min(scope.maxZoom, scope.object.zoom * dollyScale));
+                    scope.object.updateProjectionMatrix();
+                    zoomChanged = true;
+                }
+            }
+
+            function dollyIn(dollyScale) {
+                if (scope.object.isPerspectiveCamera) {
+                    scale *= dollyScale;
+                } else if (scope.object.isOrthographicCamera) {
+                    scope.object.zoom = Math.max(scope.minZoom, Math.min(scope.maxZoom, scope.object.zoom / dollyScale));
+                    scope.object.updateProjectionMatrix();
+                    zoomChanged = true;
+                }
+            }
+
+            function handleMouseDownRotate(event) {
+                rotateStart.set(event.clientX, event.clientY);
+            }
+
+            function handleMouseDownDolly(event) {
+                dollyStart.set(event.clientX, event.clientY);
+            }
+
+            function handleMouseMoveRotate(event) {
+                rotateEnd.set(event.clientX, event.clientY);
+                rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(scope.rotateSpeed);
+                const element = scope.domElement;
+                rotateLeft(2 * Math.PI * rotateDelta.x / element.clientHeight);
+                rotateUp(2 * Math.PI * rotateDelta.y / element.clientHeight);
+                rotateStart.copy(rotateEnd);
+                scope.update();
+            }
+
+            function handleMouseMoveDolly(event) {
+                dollyEnd.set(event.clientX, event.clientY);
+                dollyDelta.subVectors(dollyEnd, dollyStart);
+                if (dollyDelta.y > 0) {
+                    dollyOut(getZoomScale());
+                } else if (dollyDelta.y < 0) {
+                    dollyIn(getZoomScale());
+                }
+                dollyStart.copy(dollyEnd);
+                scope.update();
+            }
+
+            function handleMouseWheel(event) {
+                if (event.deltaY < 0) {
+                    dollyIn(getZoomScale());
+                } else if (event.deltaY > 0) {
+                    dollyOut(getZoomScale());
+                }
+                scope.update();
+            }
+
+            function getZoomScale() {
+                return Math.pow(0.95, scope.zoomSpeed);
+            }
+
             function onMouseDown(event) {
+                if (scope.enabled === false) return;
                 event.preventDefault();
-                if (event.button === 0) {
-                    rotateStart.set(event.clientX, event.clientY);
-                    state = STATE.ROTATE;
+
+                switch (event.button) {
+                    case 0:
+                        if (scope.enableRotate === false) return;
+                        handleMouseDownRotate(event);
+                        state = STATE.ROTATE;
+                        break;
+                    case 1:
+                        if (scope.enableZoom === false) return;
+                        handleMouseDownDolly(event);
+                        state = STATE.DOLLY;
+                        break;
+                }
+
+                if (state !== STATE.NONE) {
+                    scope.domElement.ownerDocument.addEventListener('mousemove', onMouseMove);
+                    scope.domElement.ownerDocument.addEventListener('mouseup', onMouseUp);
+                    scope.dispatchEvent(_startEvent);
                 }
             }
 
             function onMouseMove(event) {
+                if (scope.enabled === false) return;
                 event.preventDefault();
-                if (state === STATE.ROTATE) {
-                    rotateEnd.set(event.clientX, event.clientY);
-                    rotateDelta.subVectors(rotateEnd, rotateStart).multiplyScalar(scope.rotateSpeed);
-                    const element = scope.domElement;
-                    rotateLeft(2 * Math.PI * rotateDelta.x / element.clientHeight);
-                    rotateStart.copy(rotateEnd);
-                    scope.update();
+
+                switch (state) {
+                    case STATE.ROTATE:
+                        if (scope.enableRotate === false) return;
+                        handleMouseMoveRotate(event);
+                        break;
+                    case STATE.DOLLY:
+                        if (scope.enableZoom === false) return;
+                        handleMouseMoveDolly(event);
+                        break;
                 }
             }
 
             function onMouseUp() {
+                if (scope.enabled === false) return;
+                scope.domElement.ownerDocument.removeEventListener('mousemove', onMouseMove);
+                scope.domElement.ownerDocument.removeEventListener('mouseup', onMouseUp);
+                scope.dispatchEvent(_endEvent);
                 state = STATE.NONE;
             }
 
-            this.domElement.addEventListener('mousedown', onMouseDown);
-            this.domElement.addEventListener('mousemove', onMouseMove);
-            this.domElement.addEventListener('mouseup', onMouseUp);
+            function onMouseWheel(event) {
+                if (scope.enabled === false || scope.enableZoom === false || state !== STATE.NONE) return;
+                event.preventDefault();
+                event.stopPropagation();
+                scope.dispatchEvent(_startEvent);
+                handleMouseWheel(event);
+                scope.dispatchEvent(_endEvent);
+            }
+
             this.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+            this.domElement.addEventListener('mousedown', onMouseDown);
+            this.domElement.addEventListener('wheel', onMouseWheel, { passive: false });
 
             this.update();
         }
@@ -216,10 +322,7 @@ let audioReproducido = false;
 const textoAnillo = "TE AMO CON TODO MI CORAZÓN Y ALMA PARA SIEMPRE MI AMOR ETERNO";
 
 const mensajesAmor = [
-    "TE AMO", "TE QUIERO", "MI REINA", "MI AMOR", "ERES ÚNICA",
-    "PARA SIEMPRE", "MI VIDA", "MI CORAZÓN", "MI ALMA", "MI LUZ",
-    "MI RAZÓN", "MI FELICIDAD", "MI SUEÑO", "MI DESEO", "MI PASIÓN",
-    "MI TESORO", "MI ÁNGEL", "MI SOL", "MI ESTRELLA", "MI DESTINO"
+    "TE AMO", "TE QUIERO", "MI REINA", "MI AMOR", "ERES ÚNICA", "PARA SIEMPRE", "MI VIDA", "MI CORAZÓN", "MI ALMA", "MI LUZ", "MI RAZÓN", "MI FELICIDAD", "MI SUEÑO", "MI DESEO", "MI PASIÓN", "MI TESORO", "MI ÁNGEL", "MI SOL", "MI ESTRELLA", "MI DESTINO", "MI TODO", "MI VIDA ENTERA", "MI PRINCESA", "MI REINA HERMOSA", "MI COMPLEMENTO", "MI MUNDO", "MI PERSONA FAVORITA", "MI INSPIRACIÓN", "MI ALEGRÍA", "MI REFUGIO", "MI AMOR BONITO", "MI LOCURA LINDA", "MI ADICCIÓN", "MI ILUSIÓN", "MI COMPLICIDAD", "MI CIELO", "MI LATIDO", "MI POESÍA", "MI RESPIRACIÓN", "MI TODO EN UNO", "MI ABRAZO FAVORITO", "MI CARICIA PERFECTA", "MI VERDAD", "MI SUEÑO HECHO REALIDAD", "MI FINAL FELIZ", "MI MILAGRO", "MI PRESENTE Y FUTURO", "MI HOGAR", "MI ENAMORADA ETERNA", "MI CANCIÓN FAVORITA", "MI DESTINO PERFECTO", "MI VIDA CONTIGO", "MI HISTORIA DE AMOR", "MI LUGAR SEGURO", "MI TODO LO BONITO", "MI AMOR DE CINE", "MI RAZÓN DE SONREÍR", "MI VERSO MÁS BELLO", "MI AMOR ETERNO", "MI MUSA", "MI PASADO, PRESENTE Y FUTURO"
 ];
 
 const mensajesImagen = [
@@ -293,10 +396,13 @@ function inicializar() {
         controles.dampingFactor = 0.05;
         controles.rotateSpeed = 0.5;
         controles.enableZoom = true;
+        controles.zoomSpeed = 1.0;
         controles.autoRotate = true;
         controles.autoRotateSpeed = 0.2;
-        controles.minDistance = 20;
-        controles.maxDistance = 60;
+        controles.minDistance = 10;
+        controles.maxDistance = 80;
+        controles.minPolarAngle = 0;
+        controles.maxPolarAngle = Math.PI;
 
         // Iluminación
         const luzAmbiental = new THREE.AmbientLight(0x444477, 0.4);
@@ -326,33 +432,9 @@ function crearSaturno() {
     // Crear geometría de Saturno
     const geometria = new THREE.SphereGeometry(4, 64, 64);
 
-    // Crear material con textura procedural
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 256;
-    const context = canvas.getContext('2d');
-
-    // Crear patrón de Saturno
-    const gradient = context.createLinearGradient(0, 0, 0, 256);
-    gradient.addColorStop(0, '#FFA500'); // Naranja
-    gradient.addColorStop(0.3, '#FFD700'); // Dorado
-    gradient.addColorStop(0.7, '#DDA0DD'); // Púrpura claro
-    gradient.addColorStop(1, '#8B4513'); // Marrón
-
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, 512, 256);
-
-    // Añadir bandas horizontales de Saturno
-    for (let i = 0; i < 20; i++) {
-        const y = (i / 20) * 256;
-        const opacity = Math.random() * 0.3 + 0.1;
-        context.fillStyle = `rgba(139, 69, 19, ${opacity})`;
-        context.fillRect(0, y, 512, 2);
-    }
-
-    const textura = new THREE.CanvasTexture(canvas);
-    textura.wrapS = THREE.RepeatWrapping;
-    textura.wrapT = THREE.RepeatWrapping;
+    // Cargar la textura desde el archivo
+    const cargadorTextura = new THREE.TextureLoader();
+    const textura = cargadorTextura.load('textura/textura_sat.jpg');
 
     const material = new THREE.MeshPhongMaterial({
         map: textura,
@@ -417,7 +499,7 @@ function crearSaturno() {
 
 function crearAnilloTexto() {
     const loader = new THREE.FontLoader();
-    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (fuente) {
+    loader.load('https://threejs.org/examples/fonts/gentilis_bold.typeface.json', function (fuente) {
 
         const radio = 9;
         const totalLetras = textoAnillo.length;
@@ -446,11 +528,15 @@ function crearAnilloTexto() {
 
             const mallaTexto = new THREE.Mesh(geometriaTexto, materialTexto);
 
-            // Posicionar letra en el círculo
-            const angulo = i * pasoAngulo;
+            // Posicionar letra en el círculo (invertido para lectura correcta)
+            const angulo = -i * pasoAngulo; // Negativo para invertir dirección
             mallaTexto.position.x = Math.cos(angulo) * radio;
             mallaTexto.position.z = Math.sin(angulo) * radio;
             mallaTexto.position.y = Math.sin(angulo * 3) * 0.5;
+
+            // Rotar la letra para que mire hacia afuera y esté orientada correctamente
+            mallaTexto.lookAt(0, mallaTexto.position.y, 0);
+            mallaTexto.rotateY(Math.PI);
 
             escena.add(mallaTexto);
             objetosTextoAnillo.push(mallaTexto);
@@ -494,7 +580,7 @@ function crearCampoEstrellas() {
 
 function crearMensajesAmor() {
     const loader = new THREE.FontLoader();
-    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (fuente) {
+    loader.load('https://threejs.org/examples/fonts/gentilis_bold.typeface.json', function (fuente) {
 
         // Barajar mensajes y tomar 30
         const mensajesMezclados = [...mensajesAmor].sort(() => Math.random() - 0.5);
@@ -821,8 +907,38 @@ function animar() {
         obj.malla.lookAt(camara.position);
     });
 
+    // Actualizar posición de la luna CSS según la cámara
+    actualizarPosicionLuna();
+
     controles.update();
     renderizador.render(escena, camara);
+}
+
+function actualizarPosicionLuna() {
+    const luna = document.querySelector('.luna');
+    if (!luna) return;
+
+    // Crear un vector para la posición de la luna en el espacio 3D
+    const posicionLuna3D = new THREE.Vector3(50, 30, -80);
+
+    // Proyectar la posición 3D a coordenadas 2D de la pantalla
+    const vectorPantalla = posicionLuna3D.clone();
+    vectorPantalla.project(camara);
+
+    // Convertir a coordenadas de píxeles
+    const x = (vectorPantalla.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (vectorPantalla.y * -0.5 + 0.5) * window.innerHeight;
+
+    // Actualizar posición de la luna
+    luna.style.left = x + 'px';
+    luna.style.top = y + 'px';
+
+    // Opcional: ajustar opacidad si la luna está detrás de la cámara
+    if (vectorPantalla.z > 1) {
+        luna.style.opacity = '0.3';
+    } else {
+        luna.style.opacity = '0.8';
+    }
 }
 
 // Inicializar la aplicación
