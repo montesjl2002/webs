@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxia de Amor con Saturno</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body>
+    <div class="cielo" id="cielo-estrellas">
+        <div class="luna"></div>
+    </div>
+
+    <div id="cargando">
+        <div class="contenido-cargando">
+            <h2>Preparando todo para ti, mi amor</h2>
+            <div class="cargador-reloj" id="cargador-reloj" style="--progreso: 0%;">
+                <div class="manecilla-reloj"></div>
+                <div class="centro-reloj"></div>
+            </div>
+            <div class="texto-progreso" id="texto-progreso">0%</div>
+        </div>
+    </div>
+
+    <div id="contenedor-escena"></div>
+
+    <div id="superposicion-ui">
+        <button id="alternar-audio">🔊</button>
+        <div id="indicador-toque"></div>
+        <div id="instrucciones">Toca la pantalla mi amor ❤️</div>
+        <!--<div class="galeria">
+            <div class="elemento-galeria" data-indice="0">
+                <div
+                    style="background: linear-gradient(45deg, #ff69b4, #ff1493); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                    ❤️</div>
+            </div>
+            <div class="elemento-galeria" data-indice="1">
+                <div
+                    style="background: linear-gradient(45deg, #9370db, #ba55d3); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                    💕</div>
+            </div>
+            <div class="elemento-galeria" data-indice="2">
+                <div
+                    style="background: linear-gradient(45deg, #ff69b4, #dda0dd); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                    💖</div>
+            </div>
+            <div class="elemento-galeria" data-indice="3">
+                <div
+                    style="background: linear-gradient(45deg, #ff1493, #ff69b4); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                    💝</div>
+            </div>
+        </div>-->
+    </div>
+
+    <div id="modal-imagen" class="modal">
+        <span class="boton-cerrar">×</span>
+        <div class="contenido-modal" id="imagen-modal"
+            style="background: linear-gradient(45deg, #ff69b4, #ff1493); padding: 50px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px;">❤️</div>
+            <div style="font-size: 24px; color: white;">Mi Amor Eterno</div>
+        </div>
+        <div class="mensaje-modal" id="mensaje-modal">Eres la luz que ilumina mi vida cada día</div>
+    </div>
+
+    <audio id="audio-fondo" loop>
+        <source src="" type="audio/wav">
+    </audio>
+
+    <script src="./scripts/script.js"></script>
+</body>
+
+</html>
