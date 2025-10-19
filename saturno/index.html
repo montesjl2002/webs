@@ -411,8 +411,8 @@
         <div class="mensaje-modal" id="mensaje-modal">Eres la luz que ilumina mi vida cada día</div>
     </div>
 
-    <audio id="audio-fondo" loop>
-        <source src="saturno.mp3" type="audio/wav">
+    <audio id="audio-fondo" loop preload="auto">
+        <source src="assets/saturno.mp3" type="audio/mpeg">
     </audio>
 
     <script>
@@ -852,7 +852,7 @@
 
             // Cargar la textura desde el archivo
             const cargadorTextura = new THREE.TextureLoader();
-            const textura = cargadorTextura.load('textura/textura_sat.jpg');
+            const textura = cargadorTextura.load('assets/textura/textura_sat.jpg');
 
             const material = new THREE.MeshPhongMaterial({
                 map: textura,
