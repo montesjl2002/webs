@@ -53,18 +53,20 @@ h2 {
 }
 
 .luna {
-    position: absolute; /* Cambiado de fixed a absolute */
+    position: absolute;
+    /* Cambiado de fixed a absolute */
     width: 100px;
     height: 100px;
     background: radial-gradient(circle at 30% 30%, #ffffff, #e0e0e0);
     border-radius: 50%;
     box-shadow: 0 0 60px rgba(255, 255, 255, 0.8),
-                inset -10px -10px 20px rgba(0, 0, 0, 0.2);
+        inset -10px -10px 20px rgba(0, 0, 0, 0.2);
     opacity: 0.8;
     transition: left 0.1s ease-out, top 0.1s ease-out, opacity 0.3s ease;
     pointer-events: none;
     z-index: 5;
-    transform: translate(-50%, -50%); /* Para centrar la luna en las coordenadas */
+    transform: translate(-50%, -50%);
+    /* Para centrar la luna en las coordenadas */
 }
 
 #contenedor-escena {

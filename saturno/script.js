@@ -434,7 +434,7 @@ function crearSaturno() {
 
     // Cargar la textura desde el archivo
     const cargadorTextura = new THREE.TextureLoader();
-    const textura = cargadorTextura.load('textura/textura_sat.jpg');
+    const textura = cargadorTextura.load('textura_saturno.jpg');
 
     const material = new THREE.MeshPhongMaterial({
         map: textura,
